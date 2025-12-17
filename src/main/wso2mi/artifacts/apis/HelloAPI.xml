@@ -1,0 +1,33 @@
+<api xmlns="http://ws.apache.org/ns/synapse" name="HelloAPI" context="/hello">
+    <resource methods="GET" uri-template="/">
+        <inSequence>
+            <variable name="inputString" expression="${params.queryParams.message}" type="STRING"/>
+            <class name="com.example.library.StringReverser">
+                <property name="input" expression="${vars.inputString}"/>
+            </class>
+            <payloadFactory media-type="json" template-type="default">
+                <format>
+                    {
+                    "original": "${vars.inputString}",
+                    "reversed": "${properties.synapse.reversedString}"
+                    }
+                </format>
+            </payloadFactory>
+            
+            <respond/>
+        </inSequence>
+        <faultSequence>
+            <log category="ERROR">
+                <message>Error processing request: ${props.synapse.ERROR_MESSAGE}</message>
+            </log>
+            <payloadFactory media-type="json">
+                <format>
+                    {
+                    "error": "Failed to process the string"
+                    }
+                </format>
+            </payloadFactory>
+            <respond/>
+        </faultSequence>
+    </resource>
+</api>
